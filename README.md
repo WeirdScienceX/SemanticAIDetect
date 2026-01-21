@@ -1,0 +1,2 @@
+# SemanticAIDetect
+Semantic AI Detector
