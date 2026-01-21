@@ -7,6 +7,46 @@ import time
 import os
 import yt_dlp # The magic library for YouTube
 
+# --- 1. PAGE CONFIG (MUST BE FIRST) ---
+st.set_page_config(page_title="Deepfake Inspector", layout="wide")
+
+# --- 2. PASSWORD LOGIC (MUST BE SECOND) ---
+def check_password():
+    """Returns `True` if the user had the correct password."""
+    
+    # Check if password is set in secrets.toml
+    if "APP_PASSWORD" not in st.secrets:
+        st.error("❌ Password not set in secrets.toml")
+        st.stop() # Stop if no password config exists
+
+    def password_entered():
+        """Checks whether a password entered by the user is correct."""
+        if st.session_state["password"] == st.secrets["APP_PASSWORD"]:
+            st.session_state["password_correct"] = True
+            del st.session_state["password"]  # Don't store password
+        else:
+            st.session_state["password_correct"] = False
+
+    if st.session_state.get("password_correct", False):
+        return True
+
+    # Show input if not authenticated
+    st.text_input(
+        "Enter Password:", 
+        type="password", 
+        on_change=password_entered, 
+        key="password"
+    )
+    
+    if "password_correct" in st.session_state:
+        st.error("😕 Password incorrect")
+        
+    return False
+
+# !!! CRITICAL LINE: THIS STOPS THE APP IF PASSWORD FAILS !!!
+if not check_password():
+    st.stop()
+
 # --- CONFIGURATION ---
 # Streamlit automatically looks in secrets.toml (local) or Cloud Secrets (deployed)
 try:
